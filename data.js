@@ -200,6 +200,7 @@ function loadTab(event, tabId) {
     if (rtDisplay && rtPhrases[tabId]) {
         const phrases = rtPhrases[tabId];
         const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+        rtSpeak(randomPhrase);
         rtDisplay.innerText = randomPhrase;
         rtDisplay.style.color = "#ffcc00";
     }
