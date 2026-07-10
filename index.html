@@ -62,6 +62,22 @@ box-shadow:0 0 12px rgba(0,255,102,.2);
 font-family:Courier New;
 
 }
+        #rt-assistant{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    z-index:9999;
+}
+
+#rt-face{
+    image-rendering:pixelated;
+    width:32px;
+    height:32px;
+    filter:drop-shadow(0 0 6px #00ff66);
+}
         body {
             font-family: 'Courier New', Courier, monospace;
             background-color: #0d0d11;
@@ -258,6 +274,34 @@ font-family:Courier New;
 <script>
     // Функция мгновенной базовой загрузки для первых трех вкладок
     function loadTab(evt, tabId) {
+        function speakRT(text){
+
+    const face=document.getElementById("rt-face");
+    const display=document.getElementById("rt-bot-display");
+
+    display.innerText=text;
+
+    let i=0;
+
+    const timer=setInterval(()=>{
+
+        face.src=(i%2===0)
+            ?"rt-open.png"
+            :"rt-closed.png";
+
+        i++;
+
+    },170);
+
+    setTimeout(()=>{
+
+        clearInterval(timer);
+
+        face.src="rt-closed.png";
+
+    },2500);
+
+        }
         updateActiveButton(evt);
         const contentBox = document.getElementById("dynamic-content");
         if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
@@ -322,8 +366,8 @@ rtSpeak("Добро пожаловать в сеть Starr Corporation.");
     }
 </script>
     // ============================
-// R-T Assistant
-// ============================
+    // R-T Assistant
+    // ============================
 
 const rtImage=document.getElementById("rt-face");
 
