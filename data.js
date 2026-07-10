@@ -3,6 +3,8 @@
 // ==========================================
 const terminalDatabase = {
     "tab-crystals": `
+    ...
+    `
         <div class="meta-grid">
             <div class="meta-item"><span>ДОКУМЕНТ:</span> SC-G-95/12-CRYSTAL</div>
             <div class="meta-item"><span>КУРАТОР:</span> Dr. Amesilvius</div>
@@ -204,5 +206,11 @@ function loadTab(event, tabId) {
         rtDisplay.innerText = randomPhrase;
         speakRT(randomPhrase);
         rtDisplay.style.color = "#ffcc00";
+        <div id="rt-assistant">
+    <img id="rt-face" src="rt-closed.png" width="32" height="32">
+</div>
+        <span id="rt-bot-display">
+    
     }
+
 }
