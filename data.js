@@ -1,4 +1,6 @@
-// База данных терминала Starr Corp
+// ==========================================
+// 1. БАЗА ДАННЫХ ТЕРМИНАЛА STARR CORP
+// ==========================================
 const terminalDatabase = {
     "tab-crystals": `
         <div class="meta-grid">
@@ -109,7 +111,7 @@ const terminalDatabase = {
         </div>
         <h2>5.1. Геологическое происхождение аномалии</h2>
         <p>Согласно секретным изысканиям астрофизического сектора, глубинная порода шахт имеет внеземную природу. В ходе бурения на самом нижнем уровне был обнаружен погребенный под слоями древних осадочных пород кратер, образовавшийся в результате падения массивного космического тела задолго до основания Starr Park.</p>
-        <p>Кристаклы S-95-GEM являются осколками ядра этого космического объекта. Излучение обладает способностью локально деформировать пространственно-временную метрику.</p>
+        <p>Кристаллы S-95-GEM являются осколками ядра этого космического объекта. Излучение обладает способностью локально деформировать пространственно-временную метрику.</p>
     `,
 
     "tab-sirius": `
@@ -120,7 +122,7 @@ const terminalDatabase = {
             <div class="meta-item"><span>СТАТУС:</span> Высокая угроза периметру</div>
         </div>
         <h2>6.1. Хронология и статус объекта</h2>
-        <p>Согласно восстановленным логам архивных баз данных, субъект Сириус вел активную публичную деятельность в период 1970-х – 1980-х годов, задолго до официального инцидента 1995 года. Его шоу являлось первоначальным градообразующим культурным вектором — именно вокруг его локации в дальнейшем началось проектирование и расширение масштабной инфраструктуры Starr Park.</p>
+        <p>Согласно восстановленным логам архивных баз данных, субъект Сириус вел активную публичную деятельность в период 1970-х – 1980-х годов, задолго до официального инцидента 1995 года. Его шоу являлось первоначальным градообразующим культурным вектором — именно вокруг его локации в дальнейшем началось проектирование и расширение масштабной infrastructure Starr Park.</p>
         <p>С развитием новых технологических секторов корпорации и изменением приоритетов NanoStarr, традиционные представления «Цирка Теней» потеряли массовый приоритет и коммерческий интерес для руководства. Субъект покинул проектную группу. Впоследствии старый цирковой шатер был полностью уничтожен в результате масштабного пожара.</p>
         <p>Рапорты внешних патрульных групп содержат показания свидетелей происшествия: в процессе горения конструкции фиксировались необъяснимые физические аномалии — хаотичное, автономное перемещение плотных теневых проекций на уцелевших стенах купола. Экспертиза Starr Corp исключает мистическую природу инцидента; аномалия классифицирована как побочный оптический эффект, вызванный взаимодействием продуктов горения экспериментальной обшивки шатра с остаточным радиационным фоном подстилающих грунтов.</p>
         <h2>6.2. Аномальные способности и союзы</h2>
@@ -129,44 +131,48 @@ const terminalDatabase = {
     `
 };
 
-// 1. Рассчитываем шансы для Starr Corp (ONLINE, DEGRADED, CONTAINMENT и т.д.)
+// ==========================================
+// 2. СЛУЧАЙНЫЕ СТАТУСЫ ДЛЯ СИСТЕМЫ СЛЕДЖЕНИЯ
+// ==========================================
 function getSystemStatus() {
-    const chance = Math.random() * 100; // Кидаем кубик от 0 до 100
+    const chance = Math.random() * 100;
 
     if (chance <= 80) {
-        return { text: "STATUS: ONLINE // ALL SYSTEMS OPERATIONAL", color: "#00ff33" }; // Зеленый
+        return { text: "STATUS: ONLINE // ALL SYSTEMS OPERATIONAL", color: "#00ff33" };
     } else if (chance <= 90) {
-        return { text: "STATUS: DEGRADED // PERFORMANCE WARNING", color: "#ffcc00" }; // Желтый
+        return { text: "STATUS: DEGRADED // PERFORMANCE WARNING", color: "#ffcc00" };
     } else if (chance <= 95) {
-        return { text: "STATUS: CONTAINMENT MODE // PROTOCOL ACTIVE", color: "#ff3333" }; // Красный
+        return { text: "STATUS: CONTAINMENT MODE // PROTOCOL ACTIVE", color: "#ff3333" };
     } else if (chance <= 99) {
-        return { text: "STATUS: SECURITY BREACH // UNAUTHORIZED ACCESS DETECTED", color: "#ff0000" }; // Ярко-красный
+        return { text: "STATUS: SECURITY BREACH // UNAUTHORIZED ACCESS DETECTED", color: "#ff0000" };
     } else {
-        return { text: "STATUS: SIGNAL LOST // RECONNECTING...", color: "#777777" }; // Серый
+        return { text: "STATUS: SIGNAL LOST // RECONNECTING...", color: "#777777" };
     }
 }
 
-// 2. Находим наш тег "system-status" из index.html и меняем в нем текст и цвет
 function applyStatus() {
     const statusElement = document.getElementById("system-status");
     if (statusElement) {
         const status = getSystemStatus();
-        statusElement.innerText = status.text;       // Меняем текст на случайный
-        statusElement.style.color = status.color;    // Красим в нужный цвет
+        statusElement.innerText = status.text;       
+        statusElement.style.color = status.color;    
     }
 }
 
-// 3. Запускаем смену статуса автоматически, как только страница полностью загрузилась
 window.addEventListener("DOMContentLoaded", applyStatus);
 
-// Автоматический поиск по твоей базе данных terminalDataBase
+// ==========================================
+// 3. ПОЛНОСТЬЮ АВТОМАТИЗИРОВАННЫЙ ПОИСК С МАРКЕРОМ СОВПАДЕНИЙ
+// ==========================================
 function runIndexer() {
     const query = document.getElementById("search-input").value.trim().toLowerCase();
     const errorElement = document.getElementById("search-error");
     const contentElement = document.getElementById("dynamic-content");
 
+    // Скрываем сообщения об ошибках перед поиском
     if (errorElement) errorElement.style.display = "none";
 
+    // Проверка пустого ввода
     if (!query) {
         if (errorElement) {
             errorElement.innerText = "ОШИБКА: ПУСТОЙ ЗАПРОС";
@@ -176,33 +182,30 @@ function runIndexer() {
     }
 
     let foundContent = null;
-    let foundKeyName = null;
 
-    // Подключаемся напрямую к твоей базе данных Starr Corp
-    const sourceData = typeof terminalDataBase !== 'undefined' ? terminalDataBase : 
-                       (typeof terminal_data_base !== 'undefined' ? terminal_data_base : 
-                       (typeof terminaldata !== 'undefined' ? terminaldata : null));
+    // Перебор базы данных terminalDatabase (автомат)
+    for (let key in terminalDatabase) {
+        const keyLower = key.toLowerCase();
+        const textLower = String(terminalDatabase[key]).toLowerCase();
 
-    if (sourceData) {
-        for (let key in sourceData) {
-            const keyLower = key.toLowerCase();
-            const textLower = String(sourceData[key]).toLowerCase();
-
-            // Ищем совпадение в названии вкладки или внутри её текста
-            if (keyLower.includes(query) || textLower.includes(query)) {
-                foundContent = sourceData[key];
-                foundKeyName = key;
-                break;
-            }
+        // Если искомое слово есть в названии вкладки ИЛИ в самом её тексте
+        if (keyLower.includes(query) || textLower.includes(query)) {
+            foundContent = terminalDatabase[key];
+            break; // Совпадение найдено, останавливаем перебор
         }
     }
 
+    // Вывод информации на дисплей
     if (foundContent) {
         if (contentElement) {
-            // Выводим данные на экран терминала
-            contentElement.innerHTML = foundContent;
+            // Крутая фишка: подсвечиваем найденное слово прямо в HTML тексте для игрока
+            const regex = new RegExp(`(${query})`, 'gi');
+            const highlightedContent = foundContent.replace(regex, "<mark style='background:#ffcc00;color:#000;padding:0 2px;border-radius:2px;'>$1</mark>");
+            
+            contentElement.innerHTML = highlightedContent;
         }
     } else {
+        // Если ничего не найдено во всей базе данных
         if (errorElement) {
             errorElement.innerText = `ОШИБКА: СОВПАДЕНИЙ ДЛЯ "${query.toUpperCase()}" НЕ ОБНАРУЖЕНО // ДОСТУП ОГРАНИЧЕН`;
             errorElement.style.display = "block";
