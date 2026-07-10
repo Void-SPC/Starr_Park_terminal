@@ -159,7 +159,7 @@ function applyStatus() {
 // 3. Запускаем смену статуса автоматически, как только страница полностью загрузилась
 window.addEventListener("DOMContentLoaded", applyStatus);
 
-// Функция автоматического поиска по ВСЕМ существующим вкладкам в файле
+// Автоматический поиск по твоей базе данных terminalDataBase
 function runIndexer() {
     const query = document.getElementById("search-input").value.trim().toLowerCase();
     const errorElement = document.getElementById("search-error");
@@ -178,17 +178,17 @@ function runIndexer() {
     let foundContent = null;
     let foundKeyName = null;
 
-    // Автоматический перебор: DATA — это твой главный объект со всеми табами из data.js
-    // Если твой главный объект называется по-другому (например, tabsData или иным именем), замени слово DATA ниже
-    const sourceData = typeof DATA !== 'undefined' ? DATA : (typeof tabsData !== 'undefined' ? tabsData : null);
+    // Подключаемся напрямую к твоей базе данных Starr Corp
+    const sourceData = typeof terminalDataBase !== 'undefined' ? terminalDataBase : 
+                       (typeof terminal_data_base !== 'undefined' ? terminal_data_base : 
+                       (typeof terminaldata !== 'undefined' ? terminaldata : null));
 
     if (sourceData) {
         for (let key in sourceData) {
-            // Переводим имя вкладки (например, "таб-комета") и её текст в нижний регистр для поиска
             const keyLower = key.toLowerCase();
             const textLower = String(sourceData[key]).toLowerCase();
 
-            // Если запрос есть в названии вкладки ИЛИ внутри её текста!
+            // Ищем совпадение в названии вкладки или внутри её текста
             if (keyLower.includes(query) || textLower.includes(query)) {
                 foundContent = sourceData[key];
                 foundKeyName = key;
@@ -199,7 +199,7 @@ function runIndexer() {
 
     if (foundContent) {
         if (contentElement) {
-            // Выводим найденный контент прямо на экран!
+            // Выводим данные на экран терминала
             contentElement.innerHTML = foundContent;
         }
     } else {
