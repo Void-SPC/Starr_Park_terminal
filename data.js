@@ -158,3 +158,59 @@ function applyStatus() {
 
 // 3. Запускаем смену статуса автоматически, как только страница полностью загрузилась
 window.addEventListener("DOMContentLoaded", applyStatus);
+
+// 1. База данных Индексатора входов (все ключи пишем маленькими буквами)
+const SEARCH_INDEX = {
+    "сириус": "ДОСЬЕ: Субъект Сириус. Статус: Под наблюдением. Объект проявляет аномальную привязанность к кристаллам S-95.",
+    "комета": "АРХИВ КОМЕТА: Обнаружен упавший метеорит в 19XX году. На основе его излучения построена первая ветка парка.",
+    "минералогия": "РАЗДЕЛ МИНЕРАЛОГИИ: Изучение кристаллов S-95-GEM. Внимание! Прямой контакт без защитных перчаток запрещен.",
+    "реконструкция": "ОПЕРАЦИЯ РЕКОНСТРУКЦИЯ: План по восстановлению подземных переходов между аттракционами Starr Park.",
+    "r-t": "МОНИТОРИНГ R-T: Автоматическая система слежения Starr Corp. Видит всё. Слышит всё."
+};
+
+// 2. Функция работы поискового индексатора (умный поиск по части слова)
+function runIndexer() {
+    const query = document.getElementById("search-input").value.trim().toLowerCase();
+    const errorElement = document.getElementById("search-error");
+    const contentElement = document.getElementById("tab-content"); // Если у тебя другой ID контента, замени "tab-content" на него
+
+    // Сбрасываем прошлую ошибку
+    if (errorElement) {
+        errorElement.style.display = "none";
+    }
+
+    if (!query) {
+        if (errorElement) {
+            errorElement.innerText = "ОШИБКА: ПУСТОЙ ЗАПРОС";
+            errorElement.style.display = "block";
+        }
+        return;
+    }
+
+    // Ищем совпадение по части слова
+    let foundKey = null;
+    for (let key in SEARCH_INDEX) {
+        if (key.includes(query)) {
+            foundKey = key;
+            break; // Нашли первое совпадение и выходим из цикла
+        }
+    }
+
+    if (foundKey) {
+        // Если документ найден, выводим его в главное окно терминала
+        if (contentElement) {
+            contentElement.innerHTML = `
+                <div class="log-entry">
+                    <h2>[РЕЗУЛЬТАТ ИНДЕКСАЦИИ: ${foundKey.toUpperCase()}]</h2>
+                    <p>${SEARCH_INDEX[foundKey]}</p>
+                </div>
+            `;
+        }
+    } else {
+        // Если ничего не нашли
+        if (errorElement) {
+            errorElement.innerText = `ОШИБКА: СОВПАДЕНИЙ ДЛЯ "${query.toUpperCase()}" НЕ ОБНАРУЖЕНО // ДОСТУП ОГРАНИЧЕН`;
+            errorElement.style.display = "block";
+        }
+    }
+}
