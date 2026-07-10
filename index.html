@@ -5,79 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARR CORP // CENTRAL TERMINAL</title>
     <style>
-    /* ===========================
-   R-T Assistant
-=========================== */
-
-#rt-assistant{
-
-position:fixed;
-
-right:20px;
-
-bottom:20px;
-
-display:flex;
-
-align-items:flex-end;
-
-gap:12px;
-
-z-index:99999;
-
-pointer-events:none;
-
-}
-
-#rt-face{
-
-width:64px;
-
-height:64px;
-
-image-rendering:pixelated;
-
-filter:drop-shadow(0 0 12px #00ff66);
-
-}
-
-#rt-message{
-
-max-width:260px;
-
-padding:12px;
-
-background:#111116;
-
-border:1px solid #00ff66;
-
-color:#00ff66;
-
-font-size:13px;
-
-border-radius:8px;
-
-box-shadow:0 0 12px rgba(0,255,102,.2);
-
-font-family:Courier New;
-
-}
-        #rt-assistant{
-    position:fixed;
-    right:20px;
-    bottom:20px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    z-index:9999;
-}
-
-#rt-face{
-    image-rendering:pixelated;
-    width:32px;
-    height:32px;
-    filter:drop-shadow(0 0 6px #00ff66);
-}
+        /* ===========================
+           Global Styles
+        =========================== */
         body {
             font-family: 'Courier New', Courier, monospace;
             background-color: #0d0d11;
@@ -233,6 +163,40 @@ font-family:Courier New;
             border-top: 1px dashed #222;
             padding-top: 15px;
         }
+
+        /* ===========================
+           R-T Assistant (Consolidated Styles)
+        =========================== */
+        #rt-assistant {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            align-items: flex-end; /* Align message bubble with bottom of R-T face */
+            gap: 12px;
+            z-index: 99999;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+
+        #rt-face {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 12px #00ff66);
+        }
+
+        #rt-message {
+            max-width: 260px;
+            padding: 12px;
+            background: #111116;
+            border: 1px solid #00ff66;
+            color: #00ff66;
+            font-size: 13px;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(0, 255, 102, .2);
+            font-family: 'Courier New', Courier, monospace;
+            pointer-events: auto; /* Allow interaction with the message bubble if needed */
+        }
     </style>
 </head>
 <body>
@@ -240,8 +204,8 @@ font-family:Courier New;
 <div class="container">
     <div class="header">
          <div id="system-status" style="font-weight: bold; text-align: center; margin-bottom: 10px;">
-    ЗАГРУЗКА СИСТЕМЫ...
-</div>
+            ЗАГРУЗКА СИСТЕМЫ...
+        </div>
         
         <h1>STARR CORPORATION & NANOSTARR</h1>
         <p>Внутренний сервер координации исследовательских групп</p>
@@ -250,64 +214,81 @@ font-family:Courier New;
 
     <div class="terminal-nav">
         <button class="nav-btn active" onclick="loadTab(event, 'tab-crystals')">01. МИНЕРАЛОГИЯ (S-95-GEM)</button>
-        <button class="nav-btn" onclick="loadTab(event, 'tab-reconstruction')">02. ОПЕРАЦИЯ «РЕКОНСТРУКЦИЯ»</button>
-        <button class="nav-btn" onclick="loadTab(event, 'tab-structure')">03. СТРУКТУРА КОМПЛЕКСА</button>
+        <button class="nav-btn" onclick="openLazyTab(event, 'tab-reconstruction')">02. ОПЕРАЦИЯ «РЕКОНСТРУКЦИЯ»</button>
+        <button class="nav-btn" onclick="openLazyTab(event, 'tab-structure')">03. СТРУКТУРА КОМПЛЕКСА</button>
         <button class="nav-btn" onclick="openLazyTab(event, 'tab-logs')">04. ЖУРНАЛЫ СМЕН (ИНЦИДЕНТЫ)</button>
         <button class="nav-btn" onclick="openLazyTab(event, 'tab-comet')">05. АРХИВ «КОМЕТА»</button>
         <button class="nav-btn" onclick="openLazyTab(event, 'tab-sirius')">06. ДОСЬЕ: СУБЪЕКТ «СИРИУС»</button>
     </div>
-<div style="border: 1px double #ffcc00; background: #110900; margin: 20px 0; padding: 12px; font-family: monospace; text-align: center; border-radius: 4px;">
-    <span id="rt-bot-display">// МОДУЛЬ R-T ОЖИДАЕТ ДЕЙСТВИЙ... СЕТЬ АКТИВНА</span>
-</div>
+    <div style="border: 1px double #ffcc00; background: #110900; margin: 20px 0; padding: 12px; font-family: monospace; text-align: center; border-radius: 4px;">
+        <span id="rt-bot-display">// МОДУЛЬ R-T ОЖИДАЕТ ДЕЙСТВИЙ... СЕТЬ АКТИВНА</span>
+    </div>
 
-    
     <div id="dynamic-content">
-        </div>
+        <!-- Content will be loaded here -->
+    </div>
 
     <div class="footer">
         [СЕТЬ R-T ОНЛАЙН] — Доступ ограничен. Попытка копирования логов маскировки расценивается как измена корпорации.
     </div>
 </div>
 
+<!-- ===========================
+     R-T ASSISTANT
+=========================== -->
+<div id="rt-assistant">
+    <img id="rt-face"
+         src="assets/rt_closed.png"
+         alt="R-T"
+         onerror="this.onerror=null;this.src='assets/rt_fallback.png';this.style.display='none';">
+
+    <div id="rt-message">
+        Система готова.
+    </div>
+</div>
+
 <script src="data.js"></script>
 
 <script>
+    // ============================
+    // R-T Assistant Logic
+    // ============================
+    const rtFace = document.getElementById("rt-face");
+    const rtMessage = document.getElementById("rt-message");
+    let rtSpeakTimer;
+
+    function rtSpeak(text) {
+        if (rtSpeakTimer) {
+            clearInterval(rtSpeakTimer);
+        }
+        rtMessage.textContent = text;
+        let i = 0;
+        rtSpeakTimer = setInterval(() => {
+            rtFace.src = (i % 2 === 0)
+                ? "assets/rt_open.png"
+                : "assets/rt_closed.png";
+            i++;
+        }, 170);
+
+        setTimeout(() => {
+            clearInterval(rtSpeakTimer);
+            rtFace.src = "assets/rt_closed.png";
+        }, 2500); // R-T speaks for 2.5 seconds
+    }
+
+    // ============================
+    // Terminal Core Logic
+    // ============================
+
     // Функция мгновенной базовой загрузки для первых трех вкладок
     function loadTab(evt, tabId) {
-        function speakRT(text){
-
-    const face=document.getElementById("rt-face");
-    const display=document.getElementById("rt-bot-display");
-
-    display.innerText=text;
-
-    let i=0;
-
-    const timer=setInterval(()=>{
-
-        face.src=(i%2===0)
-            ?"rt-open.png"
-            :"rt-closed.png";
-
-        i++;
-
-    },170);
-
-    setTimeout(()=>{
-
-        clearInterval(timer);
-
-        face.src="rt-closed.png";
-
-    },2500);
-
-        }
         updateActiveButton(evt);
         const contentBox = document.getElementById("dynamic-content");
         if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
             contentBox.innerHTML = terminalDatabase[tabId];
         } else {
-            contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА: БАЗА ДАННЫХ ДЕФРАГМЕНТИРОВАНА</div>";
+            contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА: БАЗА ДАННЫХ ДЕФРАГМЕНТИРОВАНА или вкладка не найдена.</div>";
+            rtSpeak("Ошибка загрузки данных. Проверьте целостность базы данных.");
         }
     }
 
@@ -318,12 +299,15 @@ font-family:Courier New;
         
         // Включаем имитацию обращения к серверу (скрипт ждет 350мс)
         contentBox.innerHTML = "<div class='loader'>[СВЯЗЬ С СЕРВЕРОМ R-T...] СКАНИРОВАНИЕ И ДЕШИФРОВКА ПАКЕТОВ ДАННЫХ...</div>";
-        
+        rtSpeak("Устанавливаю соединение с удаленным сервером...");
+
         setTimeout(function() {
             if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
                 contentBox.innerHTML = terminalDatabase[tabId];
+                rtSpeak("Данные успешно загружены. Анализ завершен.");
             } else {
-                contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА ДОСТУПА К ЯДРУ СЕТИ</div>";
+                contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА ДОСТУПА К ЯДРУ СЕТИ или вкладка не найдена.</div>";
+                rtSpeak("Критическая ошибка доступа к данным. Повторите попытку.");
             }
         }, 350); // Скорость "отклика" терминала. Можно менять.
     }
@@ -341,11 +325,6 @@ font-family:Courier New;
 
     // Скрипт «живых» часов серверного времени
     function updateClock() {
-        setTimeout(()=>{
-
-rtSpeak("Добро пожаловать в сеть Starr Corporation.");
-
-},800);
         var now = new Date();
         var hours = now.getHours();
         var minutes = now.getMinutes();
@@ -361,46 +340,16 @@ rtSpeak("Добро пожаловать в сеть Starr Corporation.");
     updateClock();
 
     // Первичная автозагрузка первой вкладки при открытии сайта
-    if (typeof terminalDatabase !== 'undefined') {
-        document.getElementById("dynamic-content").innerHTML = terminalDatabase["tab-crystals"];
-    }
+    // Инициализация R-T Assistant после загрузки DOM
+    document.addEventListener('DOMContentLoaded', (event) => {
+        if (typeof terminalDatabase !== 'undefined') {
+            document.getElementById("dynamic-content").innerHTML = terminalDatabase["tab-crystals"];
+            updateActiveButton(document.querySelector('.nav-btn.active')); // Ensure first button is active
+        }
+        // Initial R-T greeting
+        rtSpeak("Добро пожаловать в сеть Starr Corporation.");
+    });
+
 </script>
-    // ============================
-    // R-T Assistant
-    // ============================
-
-const rtImage=document.getElementById("rt-face");
-
-const rtBubble=document.getElementById("rt-message");
-
-function rtSpeak(text){
-
-rtBubble.textContent=text;
-
-rtImage.src="assets/rt_open.png";
-
-setTimeout(()=>{
-
-rtImage.src="assets/rt_closed.png";
-
-},700);
-
-}
-
 </body>
-    <!-- ===========================
-     R-T ASSISTANT
-=========================== -->
-
-<div id="rt-assistant">
-
-    <img id="rt-face"
-         src="assets/rt_closed.png"
-         alt="R-T">
-
-    <div id="rt-message">
-        Система готова.
-    </div>
-
-</div>
 </html>
