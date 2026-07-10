@@ -128,3 +128,33 @@ const terminalDatabase = {
         <p><strong>Внутренние взаимоотношения:</strong> Обнаружена критическая уязвимость в системе слежения. Субъект «Чарли», контролирующая био-паутину датчиков движения в Цирке Теней, осуществляет прямое сокрытие перемещений Сириуса. Зафиксированы умышленные удаления записей с камер и искажение логов телеметрии R-T, что позволяет Сириусу беспрепятственно аккумулировать силы для деструктивного противостояния Starr Corporation.</p>
     `
 };
+
+// 1. Рассчитываем шансы для Starr Corp (ONLINE, DEGRADED, CONTAINMENT и т.д.)
+function getSystemStatus() {
+    const chance = Math.random() * 100; // Кидаем кубик от 0 до 100
+
+    if (chance <= 80) {
+        return { text: "STATUS: ONLINE // ALL SYSTEMS OPERATIONAL", color: "#00ff33" }; // Зеленый
+    } else if (chance <= 90) {
+        return { text: "STATUS: DEGRADED // PERFORMANCE WARNING", color: "#ffcc00" }; // Желтый
+    } else if (chance <= 95) {
+        return { text: "STATUS: CONTAINMENT MODE // PROTOCOL ACTIVE", color: "#ff3333" }; // Красный
+    } else if (chance <= 99) {
+        return { text: "STATUS: SECURITY BREACH // UNAUTHORIZED ACCESS DETECTED", color: "#ff0000" }; // Ярко-красный
+    } else {
+        return { text: "STATUS: SIGNAL LOST // RECONNECTING...", color: "#777777" }; // Серый
+    }
+}
+
+// 2. Находим наш тег "system-status" из index.html и меняем в нем текст и цвет
+function applyStatus() {
+    const statusElement = document.getElementById("system-status");
+    if (statusElement) {
+        const status = getSystemStatus();
+        statusElement.innerText = status.text;       // Меняем текст на случайный
+        statusElement.style.color = status.color;    // Красим в нужный цвет
+    }
+}
+
+// 3. Запускаем смену статуса автоматически, как только страница полностью загрузилась
+window.addEventListener("DOMContentLoaded", applyStatus);
