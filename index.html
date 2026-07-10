@@ -5,6 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARR CORP // CENTRAL TERMINAL</title>
     <style>
+    /* ===========================
+   R-T Assistant
+=========================== */
+
+#rt-assistant{
+
+position:fixed;
+
+right:20px;
+
+bottom:20px;
+
+display:flex;
+
+align-items:flex-end;
+
+gap:12px;
+
+z-index:99999;
+
+pointer-events:none;
+
+}
+
+#rt-face{
+
+width:64px;
+
+height:64px;
+
+image-rendering:pixelated;
+
+filter:drop-shadow(0 0 12px #00ff66);
+
+}
+
+#rt-message{
+
+max-width:260px;
+
+padding:12px;
+
+background:#111116;
+
+border:1px solid #00ff66;
+
+color:#00ff66;
+
+font-size:13px;
+
+border-radius:8px;
+
+box-shadow:0 0 12px rgba(0,255,102,.2);
+
+font-family:Courier New;
+
+}
         body {
             font-family: 'Courier New', Courier, monospace;
             background-color: #0d0d11;
@@ -192,7 +249,7 @@
         </div>
 
     <div class="footer">
-        [СЕТЬ RT ОНЛАЙН] — Доступ ограничен. Попытка копирования логов маскировки расценивается как измена корпорации.
+        [СЕТЬ R-T ОНЛАЙН] — Доступ ограничен. Попытка копирования логов маскировки расценивается как измена корпорации.
     </div>
 </div>
 
@@ -240,6 +297,11 @@
 
     // Скрипт «живых» часов серверного времени
     function updateClock() {
+        setTimeout(()=>{
+
+rtSpeak("Добро пожаловать в сеть Starr Corporation.");
+
+},800);
         var now = new Date();
         var hours = now.getHours();
         var minutes = now.getMinutes();
@@ -259,6 +321,42 @@
         document.getElementById("dynamic-content").innerHTML = terminalDatabase["tab-crystals"];
     }
 </script>
+    // ============================
+// R-T Assistant
+// ============================
+
+const rtImage=document.getElementById("rt-face");
+
+const rtBubble=document.getElementById("rt-message");
+
+function rtSpeak(text){
+
+rtBubble.textContent=text;
+
+rtImage.src="assets/rt_open.png";
+
+setTimeout(()=>{
+
+rtImage.src="assets/rt_closed.png";
+
+},700);
+
+}
 
 </body>
+    <!-- ===========================
+     R-T ASSISTANT
+=========================== -->
+
+<div id="rt-assistant">
+
+    <img id="rt-face"
+         src="assets/rt_closed.png"
+         alt="R-T">
+
+    <div id="rt-message">
+        Система готова.
+    </div>
+
+</div>
 </html>
