@@ -172,7 +172,7 @@ const SEARCH_INDEX = {
 function runIndexer() {
     const query = document.getElementById("search-input").value.trim().toLowerCase();
     const errorElement = document.getElementById("search-error");
-    const contentElement = document.getElementById("tab-content"); // Если у тебя другой ID контента, замени "tab-content" на него
+    const contentElement = document.getElementById("dynamic-content"); // Если у тебя другой ID контента, замени "tab-content" на него
 
     // Сбрасываем прошлую ошибку
     if (errorElement) {
