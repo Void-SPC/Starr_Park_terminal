@@ -159,25 +159,13 @@ function applyStatus() {
 // 3. Запускаем смену статуса автоматически, как только страница полностью загрузилась
 window.addEventListener("DOMContentLoaded", applyStatus);
 
-// 1. База данных Индексатора входов (все ключи пишем маленькими буквами)
-const SEARCH_INDEX = {
-    "сириус": "ДОСЬЕ: Субъект Сириус. Статус: Под наблюдением. Объект проявляет аномальную привязанность к кристаллам S-95.",
-    "комета": "АРХИВ КОМЕТА: Обнаружен упавший метеорит в 19XX году. На основе его излучения построена первая ветка парка.",
-    "минералогия": "РАЗДЕЛ МИНЕРАЛОГИИ: Изучение кристаллов S-95-GEM. Внимание! Прямой контакт без защитных перчаток запрещен.",
-    "реконструкция": "ОПЕРАЦИЯ РЕКОНСТРУКЦИЯ: План по восстановлению подземных переходов между аттракционами Starr Park.",
-    "r-t": "МОНИТОРИНГ R-T: Автоматическая система слежения Starr Corp. Видит всё. Слышит всё."
-};
-
-// 2. Функция работы поискового индексатора (умный поиск по части слова)
+// Функция автоматического поиска по ВСЕМ существующим вкладкам в файле
 function runIndexer() {
     const query = document.getElementById("search-input").value.trim().toLowerCase();
     const errorElement = document.getElementById("search-error");
-    const contentElement = document.getElementById("dynamic-content"); // Если у тебя другой ID контента, замени "tab-content" на него
+    const contentElement = document.getElementById("dynamic-content");
 
-    // Сбрасываем прошлую ошибку
-    if (errorElement) {
-        errorElement.style.display = "none";
-    }
+    if (errorElement) errorElement.style.display = "none";
 
     if (!query) {
         if (errorElement) {
@@ -187,27 +175,34 @@ function runIndexer() {
         return;
     }
 
-    // Ищем совпадение по части слова
-    let foundKey = null;
-    for (let key in SEARCH_INDEX) {
-        if (key.includes(query)) {
-            foundKey = key;
-            break; // Нашли первое совпадение и выходим из цикла
+    let foundContent = null;
+    let foundKeyName = null;
+
+    // Автоматический перебор: DATA — это твой главный объект со всеми табами из data.js
+    // Если твой главный объект называется по-другому (например, tabsData или иным именем), замени слово DATA ниже
+    const sourceData = typeof DATA !== 'undefined' ? DATA : (typeof tabsData !== 'undefined' ? tabsData : null);
+
+    if (sourceData) {
+        for (let key in sourceData) {
+            // Переводим имя вкладки (например, "таб-комета") и её текст в нижний регистр для поиска
+            const keyLower = key.toLowerCase();
+            const textLower = String(sourceData[key]).toLowerCase();
+
+            // Если запрос есть в названии вкладки ИЛИ внутри её текста!
+            if (keyLower.includes(query) || textLower.includes(query)) {
+                foundContent = sourceData[key];
+                foundKeyName = key;
+                break;
+            }
         }
     }
 
-    if (foundKey) {
-        // Если документ найден, выводим его в главное окно терминала
+    if (foundContent) {
         if (contentElement) {
-            contentElement.innerHTML = `
-                <div class="log-entry">
-                    <h2>[РЕЗУЛЬТАТ ИНДЕКСАЦИИ: ${foundKey.toUpperCase()}]</h2>
-                    <p>${SEARCH_INDEX[foundKey]}</p>
-                </div>
-            `;
+            // Выводим найденный контент прямо на экран!
+            contentElement.innerHTML = foundContent;
         }
     } else {
-        // Если ничего не нашли
         if (errorElement) {
             errorElement.innerText = `ОШИБКА: СОВПАДЕНИЙ ДЛЯ "${query.toUpperCase()}" НЕ ОБНАРУЖЕНО // ДОСТУП ОГРАНИЧЕН`;
             errorElement.style.display = "block";
