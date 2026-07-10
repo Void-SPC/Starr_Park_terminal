@@ -237,10 +237,138 @@
      R-T ASSISTANT
 =========================== -->
 <div id="rt-assistant">
-    <img id="rt-face"
-         src="assets/rt_closed.png"
-         alt="R-T"
-         onerror="this.onerror=null;this.src='assets/rt_fallback.png';this.style.display='none';">
+    <svg id="rt-face-closed" width="64" height="64" viewBox="0 0 16 16" style="image-rendering: pixelated; filter: drop-shadow(0 0 8px #00ff66); display: block;">
+        <rect x="1" y="1" width="14" height="14" fill="#111116" stroke="#00ff66" stroke-width="1"/>
+        <rect x="4" y="5" width="2" height="3" fill="#00ff66"/>
+        <rect x="10" y="5" width="2" height="3" fill="#00ff66"/>
+        <rect x="6" y="10" width="4" height="1" fill="#00ff66"/>
+    </svg>
+
+    <svg id="rt-face-open" width="64" height="64" viewBox="0 0 16 16" style="image-rendering: pixelated; filter: drop-shadow(0 0 8px #00ff66); display: none;">
+        <rect x="1" y="1" width="14" height="14" fill="#111116" stroke="#00ff66" stroke-width="1"/>
+        <rect x="4" y="5" width="2" height="3" fill="#00ff66"/>
+        <rect x="10" y="5" width="2" height="3" fill="#00ff66"/>
+        <rect x="6" y="9" width="4" height="3" fill="#00ff66"/>
+    </svg>
+
+    <div id="rt-message">
+        Система готова.
+    </div>
+</div>
+
+<script src="data.js"></script>
+
+<script>
+    // ============================
+    // Исправленная логика анимации рта R-T
+    // ============================
+    const faceClosed = document.getElementById("rt-face-closed");
+    const faceOpen = document.getElementById("rt-face-open");
+    const rtMessage = document.getElementById("rt-message");
+    let rtSpeakTimer;
+
+    function rtSpeak(text) {
+        if (rtSpeakTimer) {
+            clearInterval(rtSpeakTimer);
+        }
+        rtMessage.textContent = text;
+        
+        let i = 0;
+        rtSpeakTimer = setInterval(() => {
+            if (i % 2 === 0) {
+                faceClosed.style.display = "none";
+                faceOpen.style.display = "block";
+            } else {
+                faceClosed.style.display = "block";
+                faceOpen.style.display = "none";
+            }
+            i++;
+        }, 180); // Скорость анимации рта
+
+        setTimeout(() => {
+            clearInterval(rtSpeakTimer);
+            faceClosed.style.style.display = "block";
+            faceOpen.style.display = "none";
+        }, 2800); // Время говорения
+    }
+
+    // ============================
+    // Остальная логика кнопок (Lazy Loading) остается без изменений
+    // ============================
+    function loadTab(evt, tabId) {
+        updateActiveButton(evt);
+        const contentBox = document.getElementById("dynamic-content");
+        if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
+            contentBox.innerHTML = terminalDatabase[tabId];
+            
+            // Связываем текст из data.js с голосом Арти
+            if (typeof rtPhrases !== 'undefined' && rtPhrases[tabId]) {
+                const phrases = rtPhrases[tabId];
+                const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                rtSpeak(randomPhrase);
+            }
+        } else {
+            contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА: БАЗА ДАННЫХ ДЕФРАГМЕНТИРОВАНА.</div>";
+            rtSpeak("Ошибка загрузки данных. База повреждена.");
+        }
+    }
+
+    function openLazyTab(evt, tabId) {
+        updateActiveButton(evt);
+        const contentBox = document.getElementById("dynamic-content");
+        
+        contentBox.innerHTML = "<div class='loader'>[СВЯЗЬ С СЕРВЕРОМ R-T...] СКАНИРОВАНИЕ...</div>";
+        rtSpeak("Устанавливаю соединение с удаленным сервером...");
+
+        setTimeout(function() {
+            if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
+                contentBox.innerHTML = terminalDatabase[tabId];
+                
+                // Случайная фраза при успешной ленивой загрузке
+                if (typeof rtPhrases !== 'undefined' && rtPhrases[tabId]) {
+                    const phrases = rtPhrases[tabId];
+                    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                    rtSpeak(randomPhrase);
+                }
+            } else {
+                contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА ДОСТУПА К ЯДРУ СЕТИ.</div>";
+                rtSpeak("Критическая ошибка доступа. Повторите попытку.");
+            }
+        }, 450); 
+    }
+
+    function updateActiveButton(evt) {
+        var tablinks = document.getElementsByClassName("nav-btn");
+        for (var i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        if(evt) {
+            evt.currentTarget.className += " active";
+        }
+    }
+
+    function updateClock() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        var seconds = now.getSeconds();
+        if (hours < 10) hours = "0" + hours;
+        if (minutes < 10) minutes = "0" + minutes;
+        if (seconds < 10) seconds = "0" + seconds;
+        document.getElementById("clock").innerText = hours + ":" + minutes + ":" + seconds;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        if (typeof terminalDatabase !== 'undefined') {
+            document.getElementById("dynamic-content").innerHTML = terminalDatabase["tab-crystals"];
+            updateActiveButton(document.querySelector('.nav-btn.active'));
+        }
+        rtSpeak("Добро пожаловать в сеть Starr Corporation. Модуль R-T активен.");
+    });
+</script>
+
 
     <div id="rt-message">
         Система готова.
