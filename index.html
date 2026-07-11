@@ -30,18 +30,6 @@
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
-        .security-alert {
-            color: #ff3333;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            animation: blink 2s infinite;
-        }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
         h1 {
             font-size: 22px;
             margin: 10px 0 5px 0;
@@ -84,18 +72,50 @@
             color: #111116;
             box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
         }
-        /* Стили динамического контента и лоадера */
+        
+        /* Стили динамического контента и загрузчика */
         #dynamic-content {
             min-height: 200px;
         }
-        .loader {
-            color: #ffaa00;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: center;
-            padding: 40px 0;
-            letter-spacing: 1px;
+        .loader-container {
+            padding: 30px;
+            border: 1px dashed #ffaa00;
+            background: rgba(255, 170, 0, 0.02);
+            font-family: monospace;
+            margin: 20px 0;
         }
+        .loader-status {
+            font-weight: bold;
+            color: #ffaa00;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        .loader-bar {
+            width: 100%;
+            background: #221a00;
+            border: 1px solid #ffaa00;
+            height: 12px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .loader-fill {
+            background: #ffaa00;
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .loader-log {
+            color: #888;
+            font-size: 12px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .loader-log li {
+            margin-bottom: 4px;
+            color: #ffcc66;
+        }
+
         .meta-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -165,26 +185,23 @@
         }
 
         /* ===========================
-           R-T Assistant (Consolidated Styles)
+           R-T Assistant Widget
         =========================== */
         #rt-assistant {
             position: fixed;
             right: 20px;
             bottom: 20px;
             display: flex;
-            align-items: flex-end; /* Align message bubble with bottom of R-T face */
+            align-items: flex-end;
             gap: 12px;
             z-index: 99999;
-            pointer-events: none; /* Allow clicks to pass through */
         }
-
-        #rt-face {
+        #rt-face-closed, #rt-face-open {
             width: 64px;
             height: 64px;
             image-rendering: pixelated;
-            filter: drop-shadow(0 0 12px #00ff66);
+            filter: drop-shadow(0 0 8px #00ff66);
         }
-
         #rt-message {
             max-width: 260px;
             padding: 12px;
@@ -193,9 +210,8 @@
             color: #00ff66;
             font-size: 13px;
             border-radius: 8px;
-            box-shadow: 0 0 12px rgba(0, 255, 102, .2);
+            box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
             font-family: 'Courier New', Courier, monospace;
-            pointer-events: auto; /* Allow interaction with the message bubble if needed */
         }
     </style>
 </head>
@@ -203,8 +219,8 @@
 
 <div class="container">
     <div class="header">
-         <div id="system-status" style="font-weight: bold; text-align: center; margin-bottom: 10px;">
-            ЗАГРУЗКА СИСТЕМЫ...
+         <div id="system-status" style="font-weight: bold; text-align: center; margin-bottom: 10px; color: #00ff33; letter-spacing: 1px;">
+            STATUS: ONLINE // ALL SYSTEMS OPERATIONAL
         </div>
         
         <h1>STARR CORPORATION & NANOSTARR</h1>
@@ -220,59 +236,60 @@
         <button class="nav-btn" onclick="openLazyTab(event, 'tab-comet')">05. АРХИВ «КОМЕТА»</button>
         <button class="nav-btn" onclick="openLazyTab(event, 'tab-sirius')">06. ДОСЬЕ: СУБЪЕКТ «СИРИУС»</button>
     </div>
-    <div style="border: 1px double #ffcc00; background: #110900; margin: 20px 0; padding: 12px; font-family: monospace; text-align: center; border-radius: 4px;">
-        <span id="rt-bot-display">// МОДУЛЬ R-T ОЖИДАЕТ ДЕЙСТВИЙ... СЕТЬ АКТИВНА</span>
+
+    <div id="rt-bot-panel" style="border: 1px double #00ff66; background: #0b1a10; margin: 20px 0; padding: 12px; font-family: monospace; text-align: center; border-radius: 4px; transition: all 0.3s ease;">
+        <span id="rt-bot-display">// МОДУЛЬ R-T АКТИВЕН... СЕТЬ ОНЛАЙН</span>
     </div>
 
     <div id="dynamic-content">
-        <!-- Content will be loaded here -->
-    </div>
+        </div>
 
     <div class="footer">
         [СЕТЬ R-T ОНЛАЙН] — Доступ ограничен. Попытка копирования логов маскировки расценивается как измена корпорации.
     </div>
 </div>
 
-<!-- ===========================
-     R-T ASSISTANT
-=========================== -->
 <div id="rt-assistant">
-    <svg id="rt-face-closed" width="64" height="64" viewBox="0 0 16 16" style="image-rendering: pixelated; filter: drop-shadow(0 0 8px #00ff66); display: block;">
+    <svg id="rt-face-closed" viewBox="0 0 16 16" style="display: block;">
         <rect x="1" y="1" width="14" height="14" fill="#111116" stroke="#00ff66" stroke-width="1"/>
         <rect x="4" y="5" width="2" height="3" fill="#00ff66"/>
         <rect x="10" y="5" width="2" height="3" fill="#00ff66"/>
         <rect x="6" y="10" width="4" height="1" fill="#00ff66"/>
     </svg>
 
-    <svg id="rt-face-open" width="64" height="64" viewBox="0 0 16 16" style="image-rendering: pixelated; filter: drop-shadow(0 0 8px #00ff66); display: none;">
+    <svg id="rt-face-open" viewBox="0 0 16 16" style="display: none;">
         <rect x="1" y="1" width="14" height="14" fill="#111116" stroke="#00ff66" stroke-width="1"/>
         <rect x="4" y="5" width="2" height="3" fill="#00ff66"/>
         <rect x="10" y="5" width="2" height="3" fill="#00ff66"/>
         <rect x="6" y="9" width="4" height="3" fill="#00ff66"/>
     </svg>
 
-    <div id="rt-message">
-        Система готова.
-    </div>
+    <div id="rt-message">Система готова.</div>
 </div>
 
 <script src="data.js"></script>
 
 <script>
-    // ============================
-    // Исправленная логика анимации рта R-T
-    // ============================
     const faceClosed = document.getElementById("rt-face-closed");
     const faceOpen = document.getElementById("rt-face-open");
     const rtMessage = document.getElementById("rt-message");
+    const rtBotDisplay = document.getElementById("rt-bot-display");
+    const rtBotPanel = document.getElementById("rt-bot-panel");
+    const systemStatus = document.getElementById("system-status");
     let rtSpeakTimer;
 
+    const fallbackPhrases = {
+        "tab-crystals": "Анализ S-95-GEM завершен. Пространственный контур стабилен.",
+        "tab-reconstruction": "Данные операции 'Реконструкция' выведены на экран. Маскировка активна.",
+        "tab-structure": "Вертикальный профиль NanoStarr успешно дешифрован.",
+        "tab-logs": "Журналы инцидентов бравлеров извлечены из архива.",
+        "tab-comet": "Внимание! Данные проекта 'Комета' имеют гриф секретности.",
+        "tab-sirius": "Опасно! Досье объекта 'Сириус' открыто. Протокол Омега наготове."
+    };
+
     function rtSpeak(text) {
-        if (rtSpeakTimer) {
-            clearInterval(rtSpeakTimer);
-        }
+        if (rtSpeakTimer) clearInterval(rtSpeakTimer);
         rtMessage.textContent = text;
-        
         let i = 0;
         rtSpeakTimer = setInterval(() => {
             if (i % 2 === 0) {
@@ -283,58 +300,121 @@
                 faceOpen.style.display = "none";
             }
             i++;
-        }, 180); // Скорость анимации рта
+        }, 160);
 
         setTimeout(() => {
             clearInterval(rtSpeakTimer);
-            faceClosed.style.style.display = "block";
+            faceClosed.style.display = "block";
             faceOpen.style.display = "none";
-        }, 2800); // Время говорения
+        }, 2800); 
     }
 
-    // ============================
-    // Остальная логика кнопок (Lazy Loading) остается без изменений
-    // ============================
-    function loadTab(evt, tabId) {
-        updateActiveButton(evt);
-        const contentBox = document.getElementById("dynamic-content");
-        if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
-            contentBox.innerHTML = terminalDatabase[tabId];
-            
-            // Связываем текст из data.js с голосом Арти
-            if (typeof rtPhrases !== 'undefined' && rtPhrases[tabId]) {
-                const phrases = rtPhrases[tabId];
-                const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-                rtSpeak(randomPhrase);
-            }
-        } else {
-            contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА: БАЗА ДАННЫХ ДЕФРАГМЕНТИРОВАНА.</div>";
-            rtSpeak("Ошибка загрузки данных. База повреждена.");
+    function getPhraseForTab(tabId) {
+        if (typeof rtPhrases !== 'undefined' && rtPhrases[tabId] && rtPhrases[tabId].length > 0) {
+            const phrases = rtPhrases[tabId];
+            return phrases[Math.floor(Math.random() * phrases.length)];
+        }
+        return fallbackPhrases[tabId] || "Данные успешно обработаны.";
+    }
+
+    function changeSystemStatus(state) {
+        if (state === 'connecting') {
+            systemStatus.textContent = "STATUS: CONNECTING // ATTEMPTING SECURE LINK...";
+            systemStatus.style.color = "#ffaa00";
+            rtBotPanel.style.borderColor = "#ffaa00";
+            rtBotPanel.style.background = "#1a1100";
+        } else if (state === 'online') {
+            systemStatus.textContent = "STATUS: ONLINE // DATA STREAM STABLE";
+            systemStatus.style.color = "#00ff33";
+            rtBotPanel.style.borderColor = "#00ff66";
+            rtBotPanel.style.background = "#0b1a10";
+        } else if (state === 'error') {
+            systemStatus.textContent = "CRITICAL ALERT: SIGNAL LOST // ACCESS DENIED";
+            systemStatus.style.color = "#ff3333";
+            rtBotPanel.style.borderColor = "#ff3333";
+            rtBotPanel.style.background = "#1a0000";
         }
     }
 
+    // Мгновенная загрузка первой вкладки
+    function loadTab(evt, tabId) {
+        updateActiveButton(evt);
+        changeSystemStatus('online');
+        const contentBox = document.getElementById("dynamic-content");
+        
+        if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
+            contentBox.innerHTML = terminalDatabase[tabId];
+            const finalPhrase = getPhraseForTab(tabId);
+            rtBotDisplay.textContent = "// ONLINE: " + finalPhrase.toUpperCase();
+            rtSpeak(finalPhrase);
+        }
+    }
+
+    // Ленивая загрузка с пошаговой отрисовкой процентов (20% -> 50% -> 80% -> 100%) и сменой фаз
     function openLazyTab(evt, tabId) {
         updateActiveButton(evt);
         const contentBox = document.getElementById("dynamic-content");
-        
-        contentBox.innerHTML = "<div class='loader'>[СВЯЗЬ С СЕРВЕРОМ R-T...] СКАНИРОВАНИЕ...</div>";
+        changeSystemStatus('connecting');
         rtSpeak("Устанавливаю соединение с удаленным сервером...");
 
-        setTimeout(function() {
+        // Создаем HTML-каркас интерактивного прогресс-бара с логом
+        contentBox.innerHTML = `
+            <div class="loader-container">
+                <div class="loader-status" id="load-status-title">[CONNECTING] ИНИЦИАЛИЗАЦИЯ ЗАПРОСА СЕТИ R-T... 0%</div>
+                <div class="loader-bar">
+                    <div class="loader-fill" id="load-progress-fill"></div>
+                </div>
+                <ul class="loader-log" id="load-status-log">
+                    <li>&gt; Отправка контрольного пакета на центральный сервер...</li>
+                </ul>
+            </div>
+        `;
+
+        const fill = document.getElementById("load-progress-fill");
+        const title = document.getElementById("load-status-title");
+        const log = document.getElementById("load-status-log");
+
+        // Фаза 1: 20%
+        setTimeout(() => {
+            fill.style.width = "20%";
+            title.textContent = "[CONNECTING] РУКОПОЖАТИЕ С СЕРВЕРОМ... 20%";
+            log.innerHTML += "<li>&gt; Сессия установлена. Запрос авторизации NanoStarr...</li>";
+            rtBotDisplay.textContent = "// CONNECTING... СКАНИРОВАНИЕ ПАКЕТОВ (20%)";
+        }, 250);
+
+        // Фаза 2: 50%
+        setTimeout(() => {
+            fill.style.width = "50%";
+            title.textContent = "[DECRYPTING] СКАНИРОВАНИЕ И ПОЛУЧЕНИЕ ЯДРА... 50%";
+            log.innerHTML += "<li>&gt; Доступ одобрен. Чтение защищенных секторов памяти...</li>";
+            rtBotDisplay.textContent = "// DECRYPTING... ДЕШИФРОВКА БАЗЫ ДАННЫХ (50%)";
+        }, 550);
+
+        // Фаза 3: 80%
+        setTimeout(() => {
+            fill.style.width = "80%";
+            title.textContent = "[DECRYPTING] ОБРАБОТКА И ПОДГОТОВКА СТРУКТУР... 80%";
+            log.innerHTML += "<li>&gt; Пакеты получены. Проверка хэш-суммы таблиц... успешно.</li>";
+            rtBotDisplay.textContent = "// PROCESSING... ВЫВОД ИНФОРМАЦИИ (80%)";
+        }, 900);
+
+        // Финал: 100% и отрисовка контента
+        setTimeout(() => {
+            fill.style.width = "100%";
             if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
                 contentBox.innerHTML = terminalDatabase[tabId];
+                changeSystemStatus('online');
                 
-                // Случайная фраза при успешной ленивой загрузке
-                if (typeof rtPhrases !== 'undefined' && rtPhrases[tabId]) {
-                    const phrases = rtPhrases[tabId];
-                    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
-                    rtSpeak(randomPhrase);
-                }
+                const finalPhrase = getPhraseForTab(tabId);
+                rtBotDisplay.textContent = "// ONLINE: " + finalPhrase.toUpperCase();
+                rtSpeak(finalPhrase);
             } else {
-                contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА ДОСТУПА К ЯДРУ СЕТИ.</div>";
-                rtSpeak("Критическая ошибка доступа. Повторите попытку.");
+                contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА ДОСТУПА. SIGNAL LOST.</div>";
+                changeSystemStatus('error');
+                rtBotDisplay.textContent = "// SIGNAL LOST: ОШИБКА ДЕФРАГМЕНТАЦИИ";
+                rtSpeak("Ошибка ядра. Связь разорвана.");
             }
-        }, 450); 
+        }, 1200);
     }
 
     function updateActiveButton(evt) {
@@ -342,9 +422,7 @@
         for (var i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
-        if(evt) {
-            evt.currentTarget.className += " active";
-        }
+        if(evt) evt.currentTarget.className += " active";
     }
 
     function updateClock() {
@@ -364,120 +442,12 @@
         if (typeof terminalDatabase !== 'undefined') {
             document.getElementById("dynamic-content").innerHTML = terminalDatabase["tab-crystals"];
             updateActiveButton(document.querySelector('.nav-btn.active'));
+            const initialPhrase = getPhraseForTab("tab-crystals");
+            rtBotDisplay.textContent = "// ONLINE: " + initialPhrase.toUpperCase();
         }
+        changeSystemStatus('online');
         rtSpeak("Добро пожаловать в сеть Starr Corporation. Модуль R-T активен.");
     });
-</script>
-
-
-    <div id="rt-message">
-        Система готова.
-    </div>
-</div>
-
-<script src="data.js"></script>
-
-<script>
-    // ============================
-    // R-T Assistant Logic
-    // ============================
-    const rtFace = document.getElementById("rt-face");
-    const rtMessage = document.getElementById("rt-message");
-    let rtSpeakTimer;
-
-    function rtSpeak(text) {
-        if (rtSpeakTimer) {
-            clearInterval(rtSpeakTimer);
-        }
-        rtMessage.textContent = text;
-        let i = 0;
-        rtSpeakTimer = setInterval(() => {
-            rtFace.src = (i % 2 === 0)
-                ? "assets/rt_open.png"
-                : "assets/rt_closed.png";
-            i++;
-        }, 170);
-
-        setTimeout(() => {
-            clearInterval(rtSpeakTimer);
-            rtFace.src = "assets/rt_closed.png";
-        }, 2500); // R-T speaks for 2.5 seconds
-    }
-
-    // ============================
-    // Terminal Core Logic
-    // ============================
-
-    // Функция мгновенной базовой загрузки для первых трех вкладок
-    function loadTab(evt, tabId) {
-        updateActiveButton(evt);
-        const contentBox = document.getElementById("dynamic-content");
-        if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
-            contentBox.innerHTML = terminalDatabase[tabId];
-        } else {
-            contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА: БАЗА ДАННЫХ ДЕФРАГМЕНТИРОВАНА или вкладка не найдена.</div>";
-            rtSpeak("Ошибка загрузки данных. Проверьте целостность базы данных.");
-        }
-    }
-
-    // Тот самый LAZY LOADING (Ленивая загрузка) с анимацией подключения к серверу
-    function openLazyTab(evt, tabId) {
-        updateActiveButton(evt);
-        const contentBox = document.getElementById("dynamic-content");
-        
-        // Включаем имитацию обращения к серверу (скрипт ждет 350мс)
-        contentBox.innerHTML = "<div class='loader'>[СВЯЗЬ С СЕРВЕРОМ R-T...] СКАНИРОВАНИЕ И ДЕШИФРОВКА ПАКЕТОВ ДАННЫХ...</div>";
-        rtSpeak("Устанавливаю соединение с удаленным сервером...");
-
-        setTimeout(function() {
-            if (typeof terminalDatabase !== 'undefined' && terminalDatabase[tabId]) {
-                contentBox.innerHTML = terminalDatabase[tabId];
-                rtSpeak("Данные успешно загружены. Анализ завершен.");
-            } else {
-                contentBox.innerHTML = "<div class='loader'>⚠️ ОШИБКА ДОСТУПА К ЯДРУ СЕТИ или вкладка не найдена.</div>";
-                rtSpeak("Критическая ошибка доступа к данным. Повторите попытку.");
-            }
-        }, 350); // Скорость "отклика" терминала. Можно менять.
-    }
-
-    // Сервисная функция обновления подсветки кнопок
-    function updateActiveButton(evt) {
-        var tablinks = document.getElementsByClassName("nav-btn");
-        for (var i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        if(evt) {
-            evt.currentTarget.className += " active";
-        }
-    }
-
-    // Скрипт «живых» часов серверного времени
-    function updateClock() {
-        var now = new Date();
-        var hours = now.getHours();
-        var minutes = now.getMinutes();
-        var seconds = now.getSeconds();
-        
-        if (hours < 10) hours = "0" + hours;
-        if (minutes < 10) minutes = "0" + minutes;
-        if (seconds < 10) seconds = "0" + seconds;
-        
-        document.getElementById("clock").innerText = hours + ":" + minutes + ":" + seconds;
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // Первичная автозагрузка первой вкладки при открытии сайта
-    // Инициализация R-T Assistant после загрузки DOM
-    document.addEventListener('DOMContentLoaded', (event) => {
-        if (typeof terminalDatabase !== 'undefined') {
-            document.getElementById("dynamic-content").innerHTML = terminalDatabase["tab-crystals"];
-            updateActiveButton(document.querySelector('.nav-btn.active')); // Ensure first button is active
-        }
-        // Initial R-T greeting
-        rtSpeak("Добро пожаловать в сеть Starr Corporation.");
-    });
-
 </script>
 </body>
 </html>
